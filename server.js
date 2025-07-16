@@ -42,5 +42,34 @@ app.post('/api/news', async (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+// DELETE /api/news/:id
+app.delete('/api/news/:id', async (req, res) => {
+  try {
+    const deleted = await News.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Article not found' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /api/news/:id
+app.put('/api/news/:id', async (req, res) => {
+  const { title, content } = req.body;
+  try {
+    const updated = await News.findByIdAndUpdate(
+      req.params.id,
+      { title, content },
+      { new: true, runValidators: true }
+    );
+    if (!updated) return res.status(404).json({ error: 'Article not found' });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
